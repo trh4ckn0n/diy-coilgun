@@ -28,7 +28,8 @@ passwords = [os.getenv("APP_PASSWORD", "trkntrkn")]
 hashed_pw = [Hasher().hash(pw) for pw in passwords]
 authenticator = stauth.Authenticate(
     names, usernames, hashed_pw,
-    'coilgun_app', 'abcdef', cookie_expiry_days=1
+    'coilgun_app', 'abcdef',
+    cookie_expiry_days=1
 )
 
 name, auth_status, username = authenticator.login('🔐 Connexion', 'main')
