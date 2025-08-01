@@ -4,7 +4,7 @@ import json
 import random
 from dotenv import load_dotenv
 import streamlit_authenticator as stauth
-from streamlit_authenticator.utilities.hasher import Hasher
+from streamlit_authenticator import Authenticate, Hasher
 
 # Charger .env
 load_dotenv()
@@ -21,18 +21,21 @@ if not agree:
 st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide", page_icon="⚡")
 
 # Authentification
-names = ['trhacknon']
+
+names = ['Trhacknon']
 usernames = ['trhacknon']
-# Générer hash des mots de passe dynamiquement
-passwords = [os.getenv("APP_PASSWORD", "trkntrkn")]
-hashed_pw = [Hasher().hash(pw) for pw in passwords]
-authenticator = stauth.Authenticate(
-    names, usernames, hashed_pw,
-    'coilgun_app', 'abcdef', 1
+
+password = os.getenv("APP_PASSWORD", "trkntrkn")
+hashed_pw = Hasher().hash(password)
+hashed_pw_list = [hashed_pw]
+
+authenticator = Authenticate(
+    names, usernames, hashed_pw_list,
+    'coilgun_app', 'abcdef',
+    cookie_expiry_days=1
 )
 
 name, auth_status, username = authenticator.login('🔐 Connexion', 'main')
-
 if auth_status:
     st.success(f"Bienvenue, {name}")
 elif auth_status is False:
