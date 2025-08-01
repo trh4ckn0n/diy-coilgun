@@ -16,14 +16,13 @@ passwords = [raw_password]
 # Générer le hash
 hashed_passwords = stauth.Hasher(passwords).generate()
 
-# Correctif ici ↓
 authenticator = stauth.Authenticate(
     names,
     usernames,
     hashed_passwords,
-    cookie_name="coilgun_app_cookie",
-    key="abcdef",
-    cookie_expiry_days=1
+    "coilgun_app_cookie",  # <- 4ème arg
+    "abcdef",              # <- 5ème arg
+    1                      # <- 6ème arg (cookie_expiry_days)
 )
 
 name, auth_status, username = authenticator.login("🔐 Connexion", "main")
