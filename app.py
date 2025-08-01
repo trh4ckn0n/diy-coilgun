@@ -1,45 +1,43 @@
 import streamlit as st
+import hashlib
 import json
 import random
-# Sécurité simple par mot de passe
-import streamlit as st
-import hashlib
 import requests
+import os
 
-def get_country():
-    try:
-        res = requests.get("https://ipinfo.io", timeout=5)
-        data = res.json()
-        return data.get("country")
-    except:
-        return None
-
-banned_countries = ["IL", "RU", "KP"]  # Israël, Russie, Corée du Nord
-
-user_country = get_country()
-if user_country in banned_countries:
-    st.error("⛔ Accès non autorisé depuis votre région.")
-    st.stop()
-    
+# --- CONFIGURATION ---
 st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide", page_icon="⚡")
 
-# Mot de passe à hacher (à ne pas stocker en clair en prod !)
-PASSWORD = "trhacknon"
-HASHED_PASSWORD = hashlib.sha256(PASSWORD.encode()).hexdigest()
+# --- FONCTIONS SÉCURITÉ ---
 
-def login():
+def check_password():
     st.markdown("## 🔐 Connexion requise")
     password_input = st.text_input("Mot de passe", type="password")
-    if hashlib.sha256(password_input.encode()).hexdigest() == HASHED_PASSWORD:
+    if hashlib.sha256(password_input.encode()).hexdigest() == hashlib.sha256("trhacknon".encode()).hexdigest():
         st.success("✅ Accès autorisé")
         return True
     elif password_input:
         st.error("⛔ Mauvais mot de passe")
     return False
 
-if not login():
+def get_country_code():
+    try:
+        res = requests.get("https://ipinfo.io", timeout=5)
+        return res.json().get("country")
+    except:
+        return None
+
+# --- BLOCAGE PAYS ---
+blocked = ["IL", "RU", "KP"]  # Israël, Russie, Corée du Nord
+if get_country_code() in blocked:
+    st.error("⛔ Accès non autorisé depuis votre région.")
     st.stop()
-    
+
+# --- MOT DE PASSE ---
+if not check_password():
+    st.stop()
+
+# --- STYLE ---
 st.markdown("""
     <style>
     body {background-color: #0d1117; color: #39ff14;}
@@ -47,6 +45,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- INTERFACE ---
 st.title("Interface Coilgun DIY - trhacknon")
 st.markdown("""
 **Configure ton railgun 😎**
@@ -64,6 +63,7 @@ if mode == "Matériel disponible":
     user_items = st.text_area("Entre ton matériel (1 par ligne)", "18650\npiles 9v\ncondensateur 4700uF\nfil cuivre 0.5mm")
     user_items = [i.strip().lower() for i in user_items.splitlines() if i.strip() != ""]
 
+# --- CONFIGURATION AUTO ---
 if mode == "Puissance maximale":
     config = {
         "batterie": "2x 18650 Li-Ion 7.4V",
@@ -85,7 +85,6 @@ elif mode == "Budget limité":
         "resistance": "Résistance 20 ohm 2W"
     }
 else:
-    # Matériel disponible : simple matching intelligent
     config = {
         "batterie": "2x 18650" if "18650" in user_items else "Pile 9V",
         "condensateur": "10000uF 25V" if any("10000" in i or "25v" in i for i in user_items) else "4700uF 16V",
@@ -96,11 +95,12 @@ else:
         "resistance": "10 ohm 5W"
     }
 
-st.subheader("Configuration recommandée")
+# --- AFFICHAGE CONFIG ---
+st.subheader("🔧 Configuration recommandée")
 st.json(config)
 
-# Liste d'achat intelligente
-st.subheader("Liste de matos + liens")
+# --- LIENS D'ACHAT ---
+st.subheader("🛒 Liste de matos + liens Amazon")
 base_links = {
     "18650": "https://www.amazon.fr/s?k=18650",
     "pile 9v": "https://www.amazon.fr/s?k=pile+9v",
@@ -114,10 +114,9 @@ base_links = {
 }
 
 for k, v in config.items():
-    key = k.lower()
     if "18650" in v:
         st.markdown(f"- **Batterie :** [{v}]({base_links['18650']})")
-    elif "pile 9v" in v:
+    elif "pile 9v" in v.lower():
         st.markdown(f"- **Batterie :** [{v}]({base_links['pile 9v']})")
     elif "condensateur" in k:
         st.markdown(f"- **Condensateur :** [{v}]({base_links['condensateur']})")
@@ -134,6 +133,6 @@ for k, v in config.items():
     elif "resistance" in v:
         st.markdown(f"- **Résistance de charge :** [{v}]({base_links['resistance']})")
 
-# Historique JSON (simulé)
-if st.checkbox("Afficher l'historique des configs JSON"):
+# --- HISTORIQUE JSON ---
+if st.checkbox("📁 Afficher l'historique JSON de cette config"):
     st.code(json.dumps({"config": config, "mode": mode, "id": random.randint(1000, 9999)}, indent=4))
