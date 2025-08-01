@@ -25,7 +25,7 @@ names = ['trhacknon']
 usernames = ['trhacknon']
 # Générer hash des mots de passe dynamiquement
 passwords = [os.getenv("APP_PASSWORD", "trkntrkn")]
-hashed_pw = Hasher().hash(passwords)
+hashed_pw = [Hasher().hash(pw) for pw in passwords]
 authenticator = stauth.Authenticate(
     names, usernames, hashed_pw,
     'coilgun_app', 'abcdef', cookie_expiry_days=1
