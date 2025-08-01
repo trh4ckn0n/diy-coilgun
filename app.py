@@ -2,46 +2,31 @@ import streamlit as st
 import os
 import json
 import random
-from dotenv import load_dotenv
 import streamlit_authenticator as stauth
+from dotenv import load_dotenv
 
-# Mot de passe brut (modifiable via variable d'environnement)
+load_dotenv()
 raw_password = os.getenv("APP_PASSWORD", "trkntrkn")
 
-# ⚠️ Nouvelle syntaxe : on passe le mot de passe à .generate()
-hashed_password = stauth.Hasher.generate([raw_password])[0]
+names = ["Trhacknon"]
+usernames = ["trhacknon"]
+passwords = [raw_password]
 
-# Configuration des utilisateurs
-credentials = {
-    "usernames": {
-        "trhacknon": {
-            "name": "Trhacknon",
-            "password": hashed_password
-        }
-    }
-}
+hashed_passwords = stauth.Hasher(passwords).generate()
 
-# Création de l'objet Authenticator
 authenticator = stauth.Authenticate(
-    credentials,
-    cookie_name="coilgun_app_cookie",
-    key="abcdef",
-    cookie_expiry_days=1,
+    names, usernames, hashed_passwords,
+    "coilgun_app_cookie", "abcdef", cookie_expiry_days=1
 )
 
-# Interface de connexion
 name, auth_status, username = authenticator.login("🔐 Connexion", "main")
 
 if auth_status:
-    st.success(f"Bienvenue {name} !")
-    st.write("Interface sécurisée pour coilgun ici.")
-    if st.button("🔓 Déconnexion"):
-        authenticator.logout("main")
-        st.experimental_rerun()
+    st.success(f"Bienvenue {name} ! Interface disponible.")
 elif auth_status is False:
-    st.error("Nom d'utilisateur ou mot de passe incorrect.")
+    st.error("Nom d’utilisateur ou mot de passe incorrect")
 else:
-    st.info("Veuillez vous connecter.")
+    st.info("Connexion requise")
 
 # Protection robots/iframes
 st.markdown("""
