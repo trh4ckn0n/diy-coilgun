@@ -3,6 +3,7 @@ import json
 import random
 import os
 from dotenv import load_dotenv
+import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities.hasher import Hasher
 load_dotenv()
 # Récupère le mot de passe depuis les variables d'environnement (à définir dans `.env` ou dans Streamlit Cloud secrets)
