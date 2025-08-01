@@ -3,49 +3,48 @@ import os
 import json
 import random
 from dotenv import load_dotenv
-from streamlit_authenticator import Authenticate, Hasher
+import streamlit_authenticator as stauth
 
-# -- Config utilisateur --
-names = ["Trhacknon"]
-usernames = ["trhacknon"]
-
-# Récupérer le mot de passe depuis l'environnement, sinon valeur par défaut
+# Mot de passe brut (modifiable via variable d'environnement)
 raw_password = os.getenv("APP_PASSWORD", "trkntrkn")
 
-# Hasher le mot de passe (Hasher.hash prend un string et retourne un hash)
-hashed_password = Hasher().hash(raw_password)
+# Hash du mot de passe
+hashed_password = stauth.Hasher([raw_password]).generate()[0]
 
-# Le constructeur Authenticate attend une liste de mots de passe hachés (même pour 1 utilisateur)
-hashed_passwords = [hashed_password]
+# Configuration des utilisateurs selon la nouvelle API
+credentials = {
+    "usernames": {
+        "trhacknon": {
+            "name": "Trhacknon",
+            "password": hashed_password
+        }
+    }
+}
 
-# -- Création de l'objet authenticator --
-authenticator = Authenticate(
-    names=names,
-    usernames=usernames,
-    passwords=hashed_passwords,
+# Création de l'objet Authenticator
+authenticator = stauth.Authenticate(
+    credentials,
     cookie_name="coilgun_app_cookie",
     key="abcdef",
     cookie_expiry_days=1,
 )
 
-# -- Affichage du formulaire de login --
+# Login
 name, auth_status, username = authenticator.login("🔐 Connexion", "main")
 
-# -- Gestion des états --
+# Affichage selon l'état de connexion
 if auth_status:
-    st.success(f"Bienvenue {name} ! Vous êtes connecté.")
-    # Ici tu peux afficher ton interface principale après login
-    st.write("Interface principale du projet coilgun...")
-    # Exemple bouton logout
-    if st.button("Déconnexion"):
+    st.success(f"Bienvenue {name} !")
+    st.write("Interface sécurisée pour coilgun ici.")
+    if st.button("🔓 Déconnexion"):
         authenticator.logout("main")
         st.experimental_rerun()
 
 elif auth_status is False:
-    st.error("Nom d'utilisateur ou mot de passe incorrect")
+    st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
 else:
-    st.info("Veuillez vous connecter pour accéder à l'application")
+    st.info("Veuillez vous connecter.")
 
 # Protection robots/iframes
 st.markdown("""
