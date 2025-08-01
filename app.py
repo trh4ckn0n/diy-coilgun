@@ -8,10 +8,10 @@ import streamlit_authenticator as stauth
 # Mot de passe brut (modifiable via variable d'environnement)
 raw_password = os.getenv("APP_PASSWORD", "trkntrkn")
 
-# Hash du mot de passe
-hashed_password = stauth.Hasher([raw_password]).generate()[0]
+# ⚠️ Nouvelle syntaxe : on passe le mot de passe à .generate()
+hashed_password = stauth.Hasher.generate([raw_password])[0]
 
-# Configuration des utilisateurs selon la nouvelle API
+# Configuration des utilisateurs
 credentials = {
     "usernames": {
         "trhacknon": {
@@ -29,20 +29,17 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=1,
 )
 
-# Login
+# Interface de connexion
 name, auth_status, username = authenticator.login("🔐 Connexion", "main")
 
-# Affichage selon l'état de connexion
 if auth_status:
     st.success(f"Bienvenue {name} !")
     st.write("Interface sécurisée pour coilgun ici.")
     if st.button("🔓 Déconnexion"):
         authenticator.logout("main")
         st.experimental_rerun()
-
 elif auth_status is False:
     st.error("Nom d'utilisateur ou mot de passe incorrect.")
-
 else:
     st.info("Veuillez vous connecter.")
 
