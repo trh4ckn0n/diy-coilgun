@@ -1,8 +1,29 @@
 import streamlit as st
 import json
 import random
+# Sécurité simple par mot de passe
+import streamlit as st
+import hashlib
 
 st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide", page_icon="⚡")
+
+# Mot de passe à hacher (à ne pas stocker en clair en prod !)
+PASSWORD = "trhacknon"
+HASHED_PASSWORD = hashlib.sha256(PASSWORD.encode()).hexdigest()
+
+def login():
+    st.markdown("## 🔐 Connexion requise")
+    password_input = st.text_input("Mot de passe", type="password")
+    if hashlib.sha256(password_input.encode()).hexdigest() == HASHED_PASSWORD:
+        st.success("✅ Accès autorisé")
+        return True
+    elif password_input:
+        st.error("⛔ Mauvais mot de passe")
+    return False
+
+if not login():
+    st.stop()
+    
 st.markdown("""
     <style>
     body {background-color: #0d1117; color: #39ff14;}
