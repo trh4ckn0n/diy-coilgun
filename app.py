@@ -1,8 +1,52 @@
 import streamlit as st
 import json
 import random
-
+import streamlit_authenticator as stauth
+import os
+from dotenv import load_dotenv
+load_dotenv()
+# Sécurité légale
+st.markdown("### ⚠️ Sécurité & usage responsable")
+agree = st.checkbox("Je certifie utiliser cette interface à des fins éducatives uniquement, en respectant les lois en vigueur.")
+if not agree:
+    st.error("Tu dois accepter pour continuer.")
+    st.stop()
 st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide", page_icon="⚡")
+
+
+names = ['trhacknon']
+usernames = ['trhacknon']
+# passwords = ['trkntrkn']
+passwords = [os.getenv("APP_PASSWORD")]
+hashed_pw = stauth.Hasher(passwords).generate()
+authenticator = stauth.Authenticate(names, usernames, hashed_pw, 'coilgun_app', 'abcdef', cookie_expiry_days=1)
+
+name, auth_status, username = authenticator.login('🔐 Connexion', 'main')
+
+if auth_status:
+    st.success(f"Bienvenue, {name}")
+    # Ton interface DIY ici
+elif auth_status is False:
+    st.error("Mauvais identifiants")
+    st.stop()
+else:
+    st.warning("Veuillez vous connecter")
+    st.stop()
+
+st.markdown("""
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.referrer = '';
+        });
+    </script>
+    <style>
+        iframe, embed, object { display: none !important; }
+    </style>
+""", unsafe_allow_html=True)
+st.markdown('<meta name="robots" content="noindex">', unsafe_allow_html=True)
+st.markdown("""
+<marquee behavior="alternate" scrollamount="5" style="color:#39ff14;font-size:18px;">⚡️ Interface avancée Coilgun DIY by trhacknon ⚡️</marquee>
+""", unsafe_allow_html=True)
 st.markdown("""
     <style>
     body {background-color: #0d1117; color: #39ff14;}
