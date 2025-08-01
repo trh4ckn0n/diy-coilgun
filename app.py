@@ -5,6 +5,10 @@ import streamlit_authenticator as stauth
 import os
 from dotenv import load_dotenv
 load_dotenv()
+# Récupère le mot de passe depuis les variables d'environnement (à définir dans `.env` ou dans Streamlit Cloud secrets)
+
+
+
 # Sécurité légale
 st.markdown("### ⚠️ Sécurité & usage responsable")
 agree = st.checkbox("Je certifie utiliser cette interface à des fins éducatives uniquement, en respectant les lois en vigueur.")
@@ -17,8 +21,10 @@ st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide"
 names = ['trhacknon']
 usernames = ['trhacknon']
 # passwords = ['trkntrkn']
-passwords = [os.getenv("APP_PASSWORD")]
-hashed_pw = stauth.Hasher(passwords).generate()
+passwords = [os.getenv("APP_PASSWORD", "trkntrkn")]  # "trkntrkn" est un fallback si la var n'est pas définie
+
+# Génère le hash
+hashed_pw = stauth.Hasher().generate(passwords)
 authenticator = stauth.Authenticate(names, usernames, hashed_pw, 'coilgun_app', 'abcdef', cookie_expiry_days=1)
 
 name, auth_status, username = authenticator.login('🔐 Connexion', 'main')
