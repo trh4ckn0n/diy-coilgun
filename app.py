@@ -4,7 +4,23 @@ import random
 # Sécurité simple par mot de passe
 import streamlit as st
 import hashlib
+import requests
 
+def get_country():
+    try:
+        res = requests.get("https://ipinfo.io", timeout=5)
+        data = res.json()
+        return data.get("country")
+    except:
+        return None
+
+banned_countries = ["IL", "RU", "KP"]  # Israël, Russie, Corée du Nord
+
+user_country = get_country()
+if user_country in banned_countries:
+    st.error("⛔ Accès non autorisé depuis votre région.")
+    st.stop()
+    
 st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide", page_icon="⚡")
 
 # Mot de passe à hacher (à ne pas stocker en clair en prod !)
