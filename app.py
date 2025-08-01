@@ -3,46 +3,49 @@ import os
 import json
 import random
 from dotenv import load_dotenv
-import streamlit_authenticator as stauth
 from streamlit_authenticator import Authenticate, Hasher
 
-# Charger .env
-load_dotenv()
-password_clair = os.getenv("APP_PASSWORD", "trkntrkn")
+# -- Config utilisateur --
+names = ["Trhacknon"]
+usernames = ["trhacknon"]
 
-# Sécurité d’usage
-st.markdown("### ⚠️ Sécurité & usage responsable")
-agree = st.checkbox("Je certifie utiliser cette interface à des fins éducatives uniquement, en respectant les lois en vigueur.")
-if not agree:
-    st.error("Tu dois accepter pour continuer.")
-    st.stop()
+# Récupérer le mot de passe depuis l'environnement, sinon valeur par défaut
+raw_password = os.getenv("APP_PASSWORD", "trkntrkn")
 
-# Configuration page
-st.set_page_config(page_title="Coilgun DIY Interface - trhacknon", layout="wide", page_icon="⚡")
+# Hasher le mot de passe (Hasher.hash prend un string et retourne un hash)
+hashed_password = Hasher().hash(raw_password)
 
-# Authentification
+# Le constructeur Authenticate attend une liste de mots de passe hachés (même pour 1 utilisateur)
+hashed_passwords = [hashed_password]
 
-names = ['Trhacknon']
-usernames = ['trhacknon']
-
-password = os.getenv("APP_PASSWORD", "trkntrkn")
-hashed_pw = Hasher().hash(password)
-hashed_pw_list = [hashed_pw]
-
+# -- Création de l'objet authenticator --
 authenticator = Authenticate(
-    names, usernames, hashed_pw_list,
-    'coilgun_app', 'abcdef'
+    names=names,
+    usernames=usernames,
+    passwords=hashed_passwords,
+    cookie_name="coilgun_app_cookie",
+    key="abcdef",
+    cookie_expiry_days=1,
 )
 
-name, auth_status, username = authenticator.login('🔐 Connexion', 'main')
+# -- Affichage du formulaire de login --
+name, auth_status, username = authenticator.login("🔐 Connexion", "main")
+
+# -- Gestion des états --
 if auth_status:
-    st.success(f"Bienvenue, {name}")
+    st.success(f"Bienvenue {name} ! Vous êtes connecté.")
+    # Ici tu peux afficher ton interface principale après login
+    st.write("Interface principale du projet coilgun...")
+    # Exemple bouton logout
+    if st.button("Déconnexion"):
+        authenticator.logout("main")
+        st.experimental_rerun()
+
 elif auth_status is False:
-    st.error("Mauvais identifiants")
-    st.stop()
+    st.error("Nom d'utilisateur ou mot de passe incorrect")
+
 else:
-    st.warning("Veuillez vous connecter")
-    st.stop()
+    st.info("Veuillez vous connecter pour accéder à l'application")
 
 # Protection robots/iframes
 st.markdown("""
