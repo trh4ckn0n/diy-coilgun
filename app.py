@@ -15,8 +15,12 @@ passwords = [raw_password]
 hashed_passwords = stauth.Hasher(passwords).generate()
 
 authenticator = stauth.Authenticate(
-    names, usernames, hashed_passwords,
-    "coilgun_app_cookie", "abcdef", cookie_expiry_days=1
+    names,
+    usernames,
+    hashed_passwords,
+    cookie_name="coilgun_app_cookie",
+    key="abcdef",
+    cookie_expiry_days=1
 )
 
 name, auth_status, username = authenticator.login("🔐 Connexion", "main")
