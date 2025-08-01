@@ -1,2 +1,2 @@
-streamlit-authenticator==0.5.0
+streamlit-authenticator
 python-dotenv
