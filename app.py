@@ -6,17 +6,24 @@ import streamlit_authenticator as stauth
 from dotenv import load_dotenv
 
 load_dotenv()
+
 raw_password = os.getenv("APP_PASSWORD", "trkntrkn")
 
 names = ["Trhacknon"]
 usernames = ["trhacknon"]
 passwords = [raw_password]
 
+# Générer le hash
 hashed_passwords = stauth.Hasher(passwords).generate()
 
+# Correctif ici ↓
 authenticator = stauth.Authenticate(
-    names, usernames, hashed_passwords,
-    "coilgun_app_cookie", "abcdef", cookie_expiry_days=1
+    names,
+    usernames,
+    hashed_passwords,
+    cookie_name="coilgun_app_cookie",
+    key="abcdef",
+    cookie_expiry_days=1
 )
 
 name, auth_status, username = authenticator.login("🔐 Connexion", "main")
@@ -26,7 +33,7 @@ if auth_status:
 elif auth_status is False:
     st.error("Nom d’utilisateur ou mot de passe incorrect")
 else:
-    st.info("Connexion requise")
+    st.info("Connexion requise") 
 
 # Protection robots/iframes
 st.markdown("""
