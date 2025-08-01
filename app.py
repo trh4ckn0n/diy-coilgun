@@ -31,8 +31,7 @@ hashed_pw_list = [hashed_pw]
 
 authenticator = Authenticate(
     names, usernames, hashed_pw_list,
-    'coilgun_app', 'abcdef',
-    cookie_expiry_days=1
+    'coilgun_app', 'abcdef'
 )
 
 name, auth_status, username = authenticator.login('🔐 Connexion', 'main')
