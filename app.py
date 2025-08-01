@@ -1,38 +1,57 @@
-import streamlit as st
 import os
 import json
 import random
 import streamlit_authenticator as stauth
 from dotenv import load_dotenv
+import streamlit as st
+import yaml
+from yaml.loader import SafeLoader
 
 load_dotenv()
 
-raw_password = os.getenv("APP_PASSWORD", "trkntrkn")
+# Config utilisateur
+config = {
+    "credentials": {
+        "usernames": {
+            "trhacknon": {
+                "email": "you@example.com",
+                "name": "Trhacknon",
+                "password": stauth.Hasher([os.getenv("APP_PASSWORD", "trkntrkn")]).generate()[0]
+            }
+        }
+    },
+    "cookie": {
+        "name": "coilgun_app_cookie",
+        "key": "abcdef",  # Clé secrète de cookie (à changer)
+        "expiry_days": 1
+    },
+    "preauthorized": {
+        "emails": ["you@example.com"]
+    }
+}
 
-names = ["Trhacknon"]
-usernames = ["trhacknon"]
-passwords = [raw_password]
-
-# Générer le hash
-hashed_passwords = stauth.Hasher(passwords).generate()
-
+# Authentificateur
 authenticator = stauth.Authenticate(
-    names,
-    usernames,
-    hashed_passwords,
-    "coilgun_app_cookie",  # <- 4ème arg
-    "abcdef",              # <- 5ème arg
-    1                      # <- 6ème arg (cookie_expiry_days)
+    config["credentials"],
+    config["cookie"]["name"],
+    config["cookie"]["key"],
+    config["cookie"]["expiry_days"],
+    config["preauthorized"]
 )
 
-name, auth_status, username = authenticator.login("🔐 Connexion", "main")
+# Interface de connexion
+name, authentication_status, username = authenticator.login("🔐 Connexion", "main")
 
-if auth_status:
-    st.success(f"Bienvenue {name} ! Interface disponible.")
-elif auth_status is False:
-    st.error("Nom d’utilisateur ou mot de passe incorrect")
-else:
-    st.info("Connexion requise") 
+if authentication_status:
+    authenticator.logout("🚪 Déconnexion", "sidebar")
+    st.success(f"Bienvenue {name} 👋")
+    st.write("Contenu sécurisé ici...")
+
+elif authentication_status is False:
+    st.error("Identifiants incorrects.")
+
+elif authentication_status is None:
+    st.warning("Veuillez vous connecter.")
 
 # Protection robots/iframes
 st.markdown("""
